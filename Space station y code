@@ -1,0 +1,123 @@
+
+import numpy as np
+import scipy.integrate
+import projectq
+from projectq import MainEngine
+from projectq.ops import H, Measure
+
+class CelestialBody:
+    def __init__(self, mass, name, x, y, vx, vy):
+        self.mass = mass
+        self.name = name
+        self.x = x
+        self.y = y
+        self.vx = vx
+        self.vy = vy
+
+class Spacecraft:
+    def __init__(self, name, x, y, vx, vy):
+        self.name = name
+        self.x = x
+        self.y = y
+        self.vx = vx
+        self.vy = vy
+
+def spacecraft_equations_of_motion(t, y, G, celestial_bodies):
+    x, vx, y, vy = y
+    acceleration_x = 0
+    acceleration_y = 0
+    for body in celestial_bodies:
+        r = np.sqrt((x - body.x)**2 + (y - body.y)**2)
+        acceleration_x += -G * body.mass * (x - body.x) / r**3
+        acceleration_y += -G * body.mass * (y - body.y) / r**3
+    return [vx, acceleration_x, vy, acceleration_y]
+
+def simulate_spacecraft_trajectory(spacecraft, celestial_bodies, t_start, t_end, n_steps):
+    G = 6.67430e-11
+    y0 = [spacecraft.x, spacecraft.vx, spacecraft.y, spacecraft.vy]
+    t = np.linspace(t_start, t_end, n_steps)
+    solution = scipy.integrate.solve_ivp(fun=lambda t, y: spacecraft_equations_of_motion(t, y, G, celestial_bodies),
+                                         t_span=[t_start, t_end],
+                                         y0=y0,
+                                         t_eval=t)
+    spacecraft.x = solution.y[0, :]
+    spacecraft.vx = solution.y[1, :]
+    spacecraft.y = solution.y[2, :]
+    spacecraft.vy = solution.y[3, :]
+
+def process_data(data):
+    engine = MainEngine()
+    qubits = engine.allocate_qubits(len(data))
+    for i, item in enumerate(data):
+        if item == 1:
+            H | qubits[i]
+    Measure | qubits
+    result = [int(qubit) for qubit in qubits]
+    engine.flush()
+    return result
+
+# Example usage of the functions
+sun = CelestialBody(mass=1.989e30, name="Sun", x=0, y=0, vx=0, vy=0)
+earth = CelestialBody(mass=5.97e24, name="Earth", x=0, y=0, vx=0, vy=0)
+spacecraft = Spacecraft(name="Spacecraft", x=0, y=0, vx=0, vy=0)
+import numpy as np
+import scipy.integrate
+import projectq
+from projectq import MainEngine
+from projectq.ops import H, Measure
+
+class CelestialBody:
+    def __init__(self, mass, name, x, y, vx, vy):
+        self.mass = mass
+        self.name = name
+        self.x = x
+        self.y = y
+        self.vx = vx
+        self.vy = vy
+
+class Spacecraft:
+    def __init__(self, name, x, y, vx, vy):
+        self.name = name
+        self.x = x
+        self.y = y
+        self.vx = vx
+        self.vy = vy
+
+def spacecraft_equations_of_motion(t, y, G, celestial_bodies):
+    x, vx, y, vy = y
+    acceleration_x = 0
+    acceleration_y = 0
+    for body in celestial_bodies:
+        r = np.sqrt((x - body.x)**2 + (y - body.y)**2)
+        acceleration_x += -G * body.mass * (x - body.x) / r**3
+        acceleration_y += -G * body.mass * (y - body.y) / r**3
+    return [vx, acceleration_x, vy, acceleration_y]
+
+def simulate_spacecraft_trajectory(spacecraft, celestial_bodies, t_start, t_end, n_steps):
+    G = 6.67430e-11
+    y0 = [spacecraft.x, spacecraft.vx, spacecraft.y, spacecraft.vy]
+    t = np.linspace(t_start, t_end, n_steps)
+    solution = scipy.integrate.solve_ivp(fun=lambda t, y: spacecraft_equations_of_motion(t, y, G, celestial_bodies),
+                                         t_span=[t_start, t_end],
+                                         y0=y0,
+                                         t_eval=t)
+    spacecraft.x = solution.y[0, :]
+    spacecraft.vx = solution.y[1, :]
+    spacecraft.y = solution.y[2, :]
+    spacecraft.vy = solution.y[3, :]
+
+def process_data(data):
+    engine = MainEngine()
+    qubits = engine.allocate_qubits(len(data))
+    for i, item in enumerate(data):
+        if item == 1:
+            H | qubits[i]
+    Measure | qubits
+    result = [int(qubit) for qubit in qubits]
+    engine.flush()
+    return result
+
+# Example usage of the functions
+sun = CelestialBody(mass=1.989e30, name="Sun", x=0, y=0, vx=0, vy=0)
+earth = CelestialBody(mass=5.97e24, name="Earth", x=0, y=0, vx=0, vy=0)
+spacecraft = Spacecraft(name="Spacecraft", x=0, y=0, vx=0, vy=0)
